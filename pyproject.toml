@@ -1,0 +1,15 @@
+[project]
+name = "python-mcp-weather-server"
+version = "0.1.0"
+description = "Python MCP server: weather lookup API via wttr.in (production-ready, portfolio sample)"
+readme = "README.md"
+requires-python = ">=3.13"
+keywords = ["mcp", "model-context-protocol", "python", "weather", "api", "server", "cursor", "ai"]
+dependencies = [
+    "mcp[cli]>=1.9.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8.0",
+]
