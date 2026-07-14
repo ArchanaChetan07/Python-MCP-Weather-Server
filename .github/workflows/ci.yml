@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI
 
 on:
   push:
@@ -10,18 +10,22 @@ jobs:
   test:
     name: Lint and Test
     runs-on: ubuntu-latest
+    env:
+      DEMO_MODE: "0"
+      ALLOW_DEMO_FALLBACK: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.13"
           cache: pip
       - name: Install dependencies
         run: |
-          pip install pytest pytest-cov flake8
-          pip install -r requirements.txt || true
+          pip install -U pip
+          pip install -r requirements.txt
       - name: Lint with flake8
-        run: flake8 . --max-line-length=120 --ignore=E501,W503 --exclude=.git,__pycache__,.ipynb_checkpoints
-        continue-on-error: true
+        run: |
+          pip install flake8
+          flake8 . --max-line-length=120 --ignore=E501,W503 --exclude=.git,__pycache__,.venv,venv,.ipynb_checkpoints
       - name: Run tests
-        run: pytest tests/ -v --tb=short || echo "Tests completed"
+        run: pytest tests/ -v --tb=short

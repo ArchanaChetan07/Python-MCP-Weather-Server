@@ -1,9 +1,9 @@
 [project]
 name = "python-mcp-weather-server"
-version = "0.1.0"
-description = "Python MCP server: weather lookup API via wttr.in (production-ready, portfolio sample)"
+version = "0.2.0"
+description = "Python MCP server: weather lookup via wttr.in with validation, demo fallback, and agent-ready retry"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 keywords = ["mcp", "model-context-protocol", "python", "weather", "api", "server", "cursor", "ai"]
 dependencies = [
     "mcp[cli]>=1.9.2",
@@ -11,5 +11,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
     "ruff>=0.8.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

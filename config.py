@@ -19,6 +19,11 @@ try:
 except ValueError:
     WEATHER_TIMEOUT_SECONDS = _DEFAULT_TIMEOUT
 
+# Offline / resilient demo: stub weather when DEMO_MODE=1 or when live fetch fails
+DEMO_MODE = os.environ.get("DEMO_MODE", "").strip().lower() in {"1", "true", "yes"}
+_ALLOW_DEMO_FALLBACK_RAW = os.environ.get("ALLOW_DEMO_FALLBACK", "1").strip().lower()
+ALLOW_DEMO_FALLBACK = _ALLOW_DEMO_FALLBACK_RAW in {"1", "true", "yes"}
+
 LOG_LEVEL = (os.environ.get("LOG_LEVEL") or "INFO").strip().upper()
 if LOG_LEVEL not in ("DEBUG", "INFO", "WARNING", "ERROR"):
     LOG_LEVEL = "INFO"

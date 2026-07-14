@@ -1,34 +1,27 @@
 # Python MCP Weather Server
 
-A **Python** **Model Context Protocol (MCP)** server that exposes weather lookup as a tool for AI assistants and IDEs. Calls [wttr.in](https://wttr.in) and returns structured JSON—production-style config, validation, and logging. Suited as a portfolio or sample project for **Python**, **MCP**, and **API** work.
+A **Python** **Model Context Protocol (MCP)** server that exposes weather lookup as a tool for AI assistants and IDEs. Calls [wttr.in](https://wttr.in) and returns structured JSON—with validation, timeouts, demo fallback, and an agent-ready observe/retry loop.
 
 ## Overview
 
-- **Purpose:** Provide a single MCP tool, `check_weather(location)`, that returns current weather for any city or place.
+- **Purpose:** MCP tool `check_weather(location)` returns current weather for any city or place.
 - **Audience:** MCP clients (e.g. Cursor, Claude Desktop). No API key required.
-- **Design:** Env-based config, input validation, timeouts, structured JSON responses, and logging for production use.
+- **Resilience:** Input validation, HTTP timeouts, structured errors, DEMO stub (`demo=True`) when the network fails, and one alternate-spelling retry after quality observation.
 
 ## Tech stack
 
-- **Python 3.13+**
+- **Python 3.10+**
 - **MCP SDK** ([mcp](https://github.com/modelcontextprotocol/python-sdk)) — stdio transport
 - **wttr.in** — weather data (HTTP, no auth)
-- **stdlib only** for HTTP and config (no Flask/FastAPI)
+- **stdlib** for HTTP (urllib)
 
 ## Quick start
 
 ```bash
-cd python-mcp-weather-server
-uv sync
-uv run python main.py
-```
-
-Or with pip:
-
-```bash
+cd Python-MCP-Weather-Server
 python -m venv .venv
 .venv\Scripts\activate   # Windows
-pip install -e .
+pip install -r requirements.txt
 python main.py
 ```
 
@@ -38,60 +31,48 @@ python main.py
 |----------|---------|-------------|
 | `WEATHER_BASE_URL` | `https://wttr.in` | Upstream base URL. |
 | `WEATHER_TIMEOUT_SECONDS` | `10` | Request timeout (seconds). |
+| `DEMO_MODE` | off | When `1`/`true`, always return stub weather (`demo=True`). |
+| `ALLOW_DEMO_FALLBACK` | `1` | On live network failure, return stub with `demo=True`. |
 | `LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR`. |
-
-## Usage
-
-**Run (stdio):** `uv run python main.py` or `python main.py`.
-
-**Cursor:** In Settings → MCP (or `.cursor/mcp.json`):
-
-```json
-{
-  "mcpServers": {
-    "weather": {
-      "command": "uv",
-      "args": ["run", "python", "main.py"],
-      "cwd": "<absolute-path-to-weather-mcp>"
-    }
-  }
-}
-```
-
-Replace `<absolute-path-to-python-mcp-weather-server>` with the project directory (e.g. `C:\\Users\\You\\Desktop\\python-mcp-weather-server` on Windows).
 
 ## Tool API
 
 **`check_weather(location: str)`**
 
-Returns a JSON object:
+Flow: validate → fetch → observe quality → retry alternate spelling once → demo fallback if still failing.
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `location` | string | Normalized location. |
 | `summary` | string | One-line weather (e.g. `London: +12°C`). |
 | `raw` | string | Same as `summary`. |
-| `success` | boolean | `true` if the request succeeded. |
-| `error` | string | Present only on failure. |
+| `success` | boolean | `true` if usable weather was returned (live or demo). |
+| `demo` | boolean | `true` when response is a stub (offline / fallback). |
+| `error` | string | Present on failure or when demo replaced a failed live call. |
+| `observation` | object | Quality observe result (`ok`, `reason`, `score`). |
+| `attempts` | int | Number of fetch attempts (1 or 2+ with demo). |
+| `retried_location` | string\|null | Alternate spelling used on retry, if any. |
 
-Success example: `{"location": "London", "summary": "London: +12°C", "raw": "London: +12°C", "success": true}`
+## Tests
 
-## Technical notes
+```bash
+pytest tests/ -v --tb=short
+```
 
-- **Validation:** Location is required, max 200 characters, and limited to safe characters (letters, digits, spaces, `-.,'`) to avoid abuse.
-- **Resilience:** Timeouts and explicit handling of HTTP, network, and timeout errors; all failures return a structured `error` field.
-- **Observability:** Structured logging with configurable level; no secrets in logs.
+All HTTP calls are mocked; CI runs lint + pytest strictly (no soft-fail).
 
 ## Project structure
 
 ```
-python-mcp-weather-server/
-├── main.py           # MCP server and check_weather tool
-├── config.py         # Env-based config and logging setup
+Python-MCP-Weather-Server/
+├── main.py                 # MCP server and check_weather tool
+├── config.py               # Env-based config and logging
 ├── tools/
 │   ├── __init__.py
-│   └── weather.py    # Validation, HTTP fetch, response shape
+│   └── weather.py          # Validation, fetch, demo, agent wrapper
+├── tests/
+│   └── test_weather_server.py
+├── requirements.txt
 ├── pyproject.toml
 └── README.md
 ```
-
