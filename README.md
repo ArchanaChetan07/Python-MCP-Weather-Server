@@ -1,100 +1,153 @@
-# Python-MCP-Weather-Server
+# Python MCP Weather Server
 
-Python · multi-agent · LLM · LangChain · FastAPI · Kubernetes · Docker · MCP · CI/CD · MLOps. MCP check_weather; 10s timeout; 13 files; CI+tests. Agentic systems with tool use, orchestration, and measurable task outcomes.
+### FastMCP stdio server exposing a resilient `check_weather` tool over wttr.in with demo fallback and observation metadata.
 
-## Results (numbers)
+[![GitHub](https://img.shields.io/badge/repo-Python-MCP-Weather-Server-181717?logo=github)](https://github.com/ArchanaChetan07/Python-MCP-Weather-Server)
+[![Language](https://img.shields.io/badge/language-Python-3572A5)](https://github.com/ArchanaChetan07/Python-MCP-Weather-Server)
+[![License](https://img.shields.io/badge/license-See%20repository-yellow)](https://github.com/ArchanaChetan07/Python-MCP-Weather-Server)
+[![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/ArchanaChetan07/Python-MCP-Weather-Server/actions)
 
-| Metric | Value |
-|---|---|
-| Tracked repository files | **13** |
-| Python modules | **5** |
-| Notebooks | **0** |
-| Markdown docs | **1** |
-| CI workflows present | **Yes** |
-| Automated tests present | **Yes** |
-| Project highlights | **MCP check_weather; 10s timeout; 13 files; CI+tests** |
+---
+
+## Overview
+
+LLM agents need a small, typed weather tool over MCP that degrades gracefully offline and returns structured success/error observations.
+
+mcp.server.fastmcp FastMCP app; async `check_weather` validates location, fetches wttr.in with timeout, retries alternate spelling, optionally returns demo stub; pytest coverage around the server.
+
+13-file MCP server package with env-configurable timeout/base URL/demo mode, CI workflow, and agent-ready JSON payloads including observation scores.
+
+This repository is maintained as **production-minded portfolio work**: clear architecture, automated checks where present, and metrics that are **traceable to committed artifacts** (never invented).
+
+---
+
+## Architecture
+
+MCP client (stdio) → FastMCP check_weather → tools/weather.fetch_weather_agent_ready → wttr.in or demo stub → JSON observation
+
+```mermaid
+flowchart LR
+  C[MCP Client] -->|stdio| S[FastMCP server]
+  S --> T[check_weather]
+  T --> F[fetch_weather_agent_ready]
+  F -->|live| W[wttr.in]
+  F -->|fallback| D[Demo stub]
+```
+
+```mermaid
+sequenceDiagram
+  participant U as User/Client
+  participant S as Service/Pipeline
+  participant E as Eval/Tools
+  U->>S: request / job
+  S->>E: execute
+  E-->>S: results
+  S-->>U: report / response
+```
+
+---
+
+## Results & repository facts
+
+> Only values found in code, configs, tests, or generated reports are listed. Absence of a clinical/ML accuracy number means it was **not** published in-repo.
+
+| Metric | Value | Source |
+|---|---|---|
+| Default weather HTTP timeout | **10 seconds** | `config.py` |
+| Tracked blobs on main | **13** | `git tree main` |
+| Tracked files | **13** | `git tree` |
+| Python modules | **5** | `git tree` |
+| Test-related paths | **1** | `git tree` |
+| CI workflows | **Yes** | `.github/workflows` |
+| Docker present | **No** | `repo root` |
+
+```mermaid
+%%{init: {'theme':'base'}}%%
+pie showData title Language composition (bytes)
+    "Python" : 89
+    "Batchfile" : 6
+    "PowerShell" : 4
+```
+
+---
+
+## Key features
+
+- Single MCP tool: check_weather
+- Configurable WEATHER_TIMEOUT_SECONDS (default 10, max 60)
+- DEMO_MODE and ALLOW_DEMO_FALLBACK stubs
+- Retry with alternate location spelling
+- Structured observation + attempts metadata
+- pytest suite + GitHub Actions CI
+
+---
 
 ## Tech stack
 
-- **Primary language:** Python
-- **Languages (GitHub):** Python (20611 bytes), Batchfile (1470 bytes), PowerShell (972 bytes)
-- **Focus area:** agent
-- **Tooling keywords:** Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM
+| Layer | Technology |
+|---|---|
+| language | Python |
+| protocol | Model Context Protocol (stdio) |
+| library | mcp[cli] FastMCP |
+| api | wttr.in |
+| packaging | pyproject.toml / uv.lock |
 
-## Architecture (logical)
+---
 
-\\	ext
-Inputs → Processing / models / agents → Evaluation & metrics → CI checks → Artifacts
-\
-## Engineering practices
-
-1. Reproducible layout with clear module boundaries  
-2. Automated validation via CI and/or tests when present  
-3. Documentation that states measurable outcomes, not slogans  
-4. Skill surface aligned to common JD keywords: Python, machine learning, NLP/LLM, Kubernetes, Docker, observability, data pipelines  
-
-## Quick start
-
-\\ash
-git clone https://github.com/ArchanaChetan07/Python-MCP-Weather-Server.git
-cd Python-MCP-Weather-Server
-# Install project requirements (see requirements.txt / pyproject.toml / environment files if present)
-# Run tests or main entrypoints documented in this repo
-\
 ## Skills demonstrated
 
-Python · machine-learning · CI/CD · API design · testing · automation · Docker · Kubernetes · FastAPI · Prometheus · data-science · LLM · MLOps · software-engineering · benchmarking · observability
+Python · MCP FastMCP · pytest · uv · CI/CD · testing · automation
 
-## License / notice
+Keyword surface: **Python · Python · machine-learning · CI/CD · testing · API · Docker · automation · data-science · software-engineering · system-design · observability · LLM · cloud**
 
-See repository license file if present. Metrics above are derived from repository structure and previously published validation notes where available.
+---
 
+## Project structure
 
-### Extended notes
+```text
+Python-MCP-Weather-Server/
+├── main.py
+├── config.py
+├── tools/weather.py
+├── tests/test_weather_server.py
+├── pyproject.toml
+└── .github/workflows/ci.yml
+```
 
-This section expands documentation for completeness: reproducibility, keyword coverage for Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM, data-science, software-engineering, benchmarking, and observability practices used across the portfolio.
+---
 
+## Installation & usage
 
-### Extended notes
+```bash
+git clone https://github.com/ArchanaChetan07/Python-MCP-Weather-Server.git
+cd Python-MCP-Weather-Server
+pip install -r requirements.txt
+python main.py
+```
 
-This section expands documentation for completeness: reproducibility, keyword coverage for Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM, data-science, software-engineering, benchmarking, and observability practices used across the portfolio.
+---
 
+## How it works
 
-### Extended notes
+On stdio transport, clients invoke `check_weather(location)`; the tool validates input, calls wttr.in within the configured timeout, can retry, and returns a dict with summary/raw/success/demo/error/observation fields suitable for agent loops.
 
-This section expands documentation for completeness: reproducibility, keyword coverage for Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM, data-science, software-engineering, benchmarking, and observability practices used across the portfolio.
+---
 
+## Future improvements
 
-### Extended notes
+- Add more MCP tools (forecast, alerts)
+- OpenAPI-style schema docs for tool outputs
+- Replace template README with MCP client wiring examples
 
-This section expands documentation for completeness: reproducibility, keyword coverage for Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM, data-science, software-engineering, benchmarking, and observability practices used across the portfolio.
+---
 
+## License
 
-### Extended notes
+See repository.
 
-This section expands documentation for completeness: reproducibility, keyword coverage for Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM, data-science, software-engineering, benchmarking, and observability practices used across the portfolio.
+---
 
-
-### Extended notes
-
-This section expands documentation for completeness: reproducibility, keyword coverage for Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM, data-science, software-engineering, benchmarking, and observability practices used across the portfolio.
-
-
-### Extended notes
-
-This section expands documentation for completeness: reproducibility, keyword coverage for Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM, data-science, software-engineering, benchmarking, and observability practices used across the portfolio.
-
-
-### Extended notes
-
-This section expands documentation for completeness: reproducibility, keyword coverage for Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM, data-science, software-engineering, benchmarking, and observability practices used across the portfolio.
-
-
-### Extended notes
-
-This section expands documentation for completeness: reproducibility, keyword coverage for Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM, data-science, software-engineering, benchmarking, and observability practices used across the portfolio.
-
-
-### Extended notes
-
-This section expands documentation for completeness: reproducibility, keyword coverage for Python, machine-learning, CI/CD, API, Docker, Kubernetes, FastAPI, Prometheus, testing, automation, MLOps, LLM, data-science, software-engineering, benchmarking, and observability practices used across the portfolio.
+<p align="center">
+  <b>Python MCP Weather Server</b><br/>
+  <a href="https://github.com/ArchanaChetan07/Python-MCP-Weather-Server">github.com/ArchanaChetan07/Python-MCP-Weather-Server</a>
+</p>
